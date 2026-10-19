@@ -18,7 +18,9 @@ AI and Codex are helping me understand the code, explore changes, and build the 
 
 ## Project status
 
-Initial setup. The customization is planned; no extension changes have been implemented yet.
+LeetHub 2.0 source (version 2.0.10) has been imported for review. Extension changes and build verification are still pending.
+
+Progress is tracked in [LEETHUB_ROADMAP.md](LEETHUB_ROADMAP.md).
 
 ## Acknowledgments
 
