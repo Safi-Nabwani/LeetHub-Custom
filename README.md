@@ -18,7 +18,7 @@ AI and Codex are helping me understand the code, explore changes, and build the 
 
 ## Project status
 
-LeetHub 2.0 source (version 2.0.10) has been imported for review. Extension changes and build verification are still pending.
+LeetHub 2.0 source (version 2.0.10) has been imported. An explicit acceptance check for the newer LeetCode interface is implemented and awaiting review; automated tests and the build pass. Live browser verification and commit cleanup are still pending.
 
 Progress is tracked in [LEETHUB_ROADMAP.md](LEETHUB_ROADMAP.md).
 

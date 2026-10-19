@@ -5,6 +5,7 @@ import {
   addLeadingZeros,
   formatStats,
   getDifficulty,
+  LeetHubError,
 } from './util.js';
 
 /*
@@ -319,7 +320,12 @@ function LeetCodeV2() {
   this.injectSpinnerStyle();
 }
 LeetCodeV2.prototype.init = async function () {
+  // Never reuse data from a previous submission if this request fails.
+  this.submissionData = undefined;
   const submissionId = this.submissionId;
+  if (!submissionId || !/^\d+$/.test(String(submissionId))) {
+    throw new LeetHubError('SubmissionIdNotFound');
+  }
 
   // Query for getting the solution runtime and memory stats, the code, the coding language, the question id, question title and question difficulty
   const submissionDetailsQuery = {
@@ -337,8 +343,26 @@ LeetCodeV2.prototype.init = async function () {
     body: JSON.stringify(submissionDetailsQuery),
   };
   const submissionData = await fetch('https://leetcode.com/graphql/', submissionDetailsOptions)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new LeetHubError('SubmissionDetailsRequestFailed');
+      }
+      return res.json();
+    })
+    .then(res => {
+      if (res.errors?.length || !res.data?.submissionDetails) {
+        throw new LeetHubError('SubmissionDetailsNotFound');
+      }
+      return res;
+    })
     .then(res => res.data.submissionDetails)
+
+  // LeetCode submission status 10 means Accepted. Fail closed for all other
+  // statuses, including pending, unknown, and missing results. Both automatic
+  // uploads and manual sync call init before performing any GitHub writes.
+  if (submissionData.statusCode !== 10) {
+    throw new LeetHubError('SubmissionNotAccepted');
+  }
     
   // Query for getting question details mainly frontendId
   // TODO: maybe handle a case where submissionData.question does not exist (e.g. LeetCode changes structure of response object)

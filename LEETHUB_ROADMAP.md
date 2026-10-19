@@ -3,7 +3,7 @@
 > **Goal:** One accepted LeetCode problem → **one meaningful Git commit**, containing its useful problem-specific files, without separate global README, topic-tag, or stats commits.
 
 **Upstream:** https://github.com/arunbhardwaj/LeetHub-2.0  
-**Status:** T1.1 discovery complete; upstream source imported. Extension changes and build verification are pending. Check boxes only after verification.  
+**Status:** T1.1–T1.2 complete. Approved acceptance check implemented; automated tests and build pass. Browser verification and commit cleanup are pending. Check boxes only after verification.
 **Execution:** Work incrementally. **Do not execute the entire roadmap at once.**
 
 ## Codex operating rules (apply to every session)
@@ -12,7 +12,7 @@
 2. Work on **only the task ID(s) I explicitly assign**. If I do not specify any, begin with **T1.1 only**.
 3. After each task, summarize what changed, evidence/tests, blockers, and the next recommended task. **Stop and wait for my next instruction.**
 4. Keep this file updated: check completed tasks `[x]`, leave blocked or unverified tasks `[ ]`, and record findings in the progress log at the bottom.
-5. You may make **local Git commits** for completed implementation phases, with descriptive messages. **Never push or force-push**, rewrite remote history, delete repositories, or modify old remote commits without explicit approval.
+5. Make **local Git commits only after explicit user approval**. Use no prefixes and capitalize the first letter of every word in commit messages. **Never push or force-push**, rewrite remote history, delete repositories, or modify old remote commits without explicit approval.
 6. Never commit secrets or credentials. Preserve authentication, LeetCode Accepted detection, language/filename/folder resolution, GitHub connection, and problem-specific content.
 7. Favor small, maintainable patches over rewrites. Check for dirty/untracked user changes before editing; don't discard them.
 8. Do not claim a test passed unless it actually ran. If real-browser verification requires me, give precise manual steps and mark verification pending.
@@ -29,9 +29,9 @@
 **Done when:** Codex reports repository state, upstream relationship, source location, and available commands. **Stop.**
 
 ### T1.2 — Trace Accepted-submission pipeline
-- [ ] Trace the path from Accepted detection through file generation to GitHub upload.
-- [ ] Identify relevant source files/functions and how language, problem slug, and destination paths are selected.
-- [ ] Record where auth and repository selection happen.
+- [x] Trace the path from Accepted detection through file generation to GitHub upload.
+- [x] Identify relevant source files/functions and how language, problem slug, and destination paths are selected.
+- [x] Record where auth and repository selection happen.
 
 **Done when:** A short, source-referenced flow is documented. **Stop.**
 
@@ -194,4 +194,26 @@ Next task:
 - Retained the custom README and upstream MIT license; added the upstream remote.
 - Verified imported source against upstream. Dependencies, build, and tests have not been run.
 - Import commit approved by the user. Next: T1.2, trace the Accepted-submission pipeline.
+
+### 2026-10-19 — T1.2
+
+- Submission entry: `scripts/leetcode/leetcode.js:559` observes Submit buttons. V2 clicks and Ctrl/Cmd+Enter call `v2SubmissionHandler` (`:539`), which requests a submission ID from the background worker (`scripts/background.js:40`) via navigation events. Manual sync reads the ID from the current URL (`leetcode.js:622`). V1 clicks call `loader` directly.
+- Detection: `loader` (`leetcode.js:416`) polls once per second for up to ten unsuccessful attempts, then calls `init`. V1 checks Success/Accepted text (`versions.js:162`). V2 only checks for a result element (`versions.js:411`); it does not explicitly validate Accepted text or the fetched statusCode. Live detection behavior remains unverified.
+- Data: V2 `init` (`versions.js:321`) fetches submission details through LeetCode GraphQL, then question details for the displayed problem ID. Code comes from `submissionData.code`; language extensions use `util.js:2` and `versions.js:387`.
+- Paths: `getProblemNameSlug` (`versions.js:405`) combines the displayed ID and title slug, padded to at least four digits (`util.js:148`). `loader` uses `<problem>/<problem><extension>`, e.g. `0001-two-sum/0001-two-sum.py`. `getPath` (`leetcode.js:42`) joins directory and filename.
+- Problem content: `parseQuestion` (`versions.js:446`) produces HTML inside the problem README. The loader creates it when no local README SHA is cached. Optional notes use `NOTES.md`; V2 `getNotesIfAny` (`versions.js:404`) is empty, so V2 currently produces no notes through that method.
+- Upload: `uploadGitWith409Retry` (`leetcode.js:245`) validates the stored token, commit mode, and repository hook, obtains cached SHAs, and retries once with a fetched SHA on HTTP 409. `upload` (`:73`) base64-encodes content upstream of the call, sends a Contents API PUT, and stores the returned file SHA locally. No branch is specified in the request.
+- After problem file preparation, the loader also calls root README topic updates (`leetcode.js:481`) and, for newly completed problems, local and persistent stats updates (`:490`). Full write/commit inventory is reserved for T1.3.
+- Authentication: `scripts/oauth2.js` starts GitHub OAuth; `scripts/authorize.js:43` exchanges the code and `:74` validates the user. `scripts/background.js:14` stores `leethub_token` and username. Repository creation/linking in `scripts/welcome.js:76` and `:168` stores `leethub_hook` and `mode_type: commit`.
+- Checks: read-only source tracing; no live submission, dependencies, build, or tests run. No extension code changed. Next: T1.3, inventory GitHub writes and propose the smallest suppression patch.
+
+### 2026-10-19 — Approved acceptance check
+
+- User approved explicit API acceptance verification before uploads.
+- V2 `init` now clears stale submission data, validates the submission ID and response, and requires numeric `statusCode === 10` before retrieving question details or returning to the upload flow. Automatic submission and manual sync share this method; legacy detection is unchanged.
+- Status mapping reference: https://pkg.go.dev/github.com/j178/leetgo/leetcode#StatusCode (LeetCode client source documentation). Live GraphQL verification is still pending.
+- Added focused tests for accepted, rejected, unknown/missing statuses, GraphQL errors, HTTP/network failures, missing IDs, and stale data clearing.
+- Installed locked dependencies with lifecycle scripts disabled. `npm test`: 25 specs, 0 failures. `npm run build`: passed with two Webpack asset-size/performance warnings for the upstream Semantic UI bundle.
+- Live browser verification pending: with only the custom extension enabled and a test repository linked, submit one rejected solution and confirm no GitHub writes; submit an accepted solution and confirm upload; repeat via manual sync on both submission pages.
+- No commit or push performed. Proposed commit: `Verify Submission Acceptance Before Uploading`. Next: user review, then T1.3.
 
