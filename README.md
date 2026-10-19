@@ -18,7 +18,27 @@ AI and Codex are helping me understand the code, explore changes, and build the 
 
 ## Project status
 
-LeetHub 2.0 source (version 2.0.10) has been imported. An explicit acceptance check for the newer LeetCode interface is implemented and awaiting review; automated tests and the build pass. Live browser verification and commit cleanup are still pending.
+LeetHub 2.0 source (version 2.0.10) has been imported, and repository discovery is complete. An explicit acceptance check for the newer LeetCode interface is committed; its automated tests and the build pass. The next change will preserve the existing solutions repository structure and features while combining solution files, root README/topics, and applicable notes/stats updates into one commit. Batching and live browser verification are still pending.
+
+## Repository structure
+
+This repository contains the browser extension. Solved problems are uploaded to the separate GitHub repository selected in the extension.
+
+| Location | Purpose |
+|---|---|
+| `scripts/leetcode/` | Submission detection, acceptance checks, problem files, and GitHub uploads |
+| `scripts/background.js` | Background messages and submission navigation events |
+| `scripts/authorize.js`, `scripts/oauth2.js` | GitHub sign-in |
+| `scripts/welcome.js`, `welcome.html` | Repository selection and setup |
+| `scripts/popup.js`, `popup.html` | Extension popup and progress display |
+| `css/`, `assets/` | Styles and images |
+| `manifest-chrome.json`, `manifest-firefox.json` | Browser permissions and extension entry points |
+| `spec/` | Automated tests |
+| `package.json`, `package-lock.json`, `webpack.config.js` | Development dependencies and build configuration |
+| `dist/` | Generated browser builds; excluded from Git |
+| `node_modules/` | Installed development dependencies; excluded from Git |
+
+The planned change preserves the existing solutions repository layout and root README updates. A focused GitHub upload module will collect all applicable solution, description, notes, topic, and stats changes and publish them together in one commit. Unchanged repeat uploads should produce no commit, and existing user content should be preserved.
 
 Progress is tracked in [LEETHUB_ROADMAP.md](LEETHUB_ROADMAP.md).
 
