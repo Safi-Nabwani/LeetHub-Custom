@@ -293,18 +293,20 @@ LeetCodeV1.prototype.insertToAnchorElement = function (elem) {
   }
 };
 /* Creates a ✔️ tick mark before "Run Code" button signaling LeetHub has done its job */
-LeetCodeV1.prototype.markUploaded = function () {
+LeetCodeV1.prototype.markUploaded = function (unchanged = false) {
   let elem = document.getElementById(this.progressSpinnerElementId);
   if (elem) {
+    elem.title = unchanged ? 'Already synced. No changes to upload.' : 'All changes uploaded in one commit.';
     elem.className = '';
     elem.style =
       'display: inline-block;transform: rotate(45deg);height:24px;width:12px;border-bottom:7px solid #78b13f;border-right:7px solid #78b13f;';
   }
 };
 /* Creates a ❌ failed tick mark before "Run Code" button signaling that upload failed */
-LeetCodeV1.prototype.markUploadFailed = function () {
+LeetCodeV1.prototype.markUploadFailed = function (message = 'Upload failed.') {
   let elem = document.getElementById(this.progressSpinnerElementId);
   if (elem) {
+    elem.title = message;
     elem.className = '';
     elem.style =
       'display: inline-block;transform: rotate(45deg);height:24px;width:12px;border-bottom:7px solid red;border-right:7px solid red;';
@@ -563,17 +565,19 @@ LeetCodeV2.prototype.insertToAnchorElement = function (elem) {
     target.appendChild(elem);
   }
 };
-LeetCodeV2.prototype.markUploaded = function () {
+LeetCodeV2.prototype.markUploaded = function (unchanged = false) {
   let elem = document.getElementById(this.progressSpinnerElementId);
   if (elem) {
+    elem.title = unchanged ? 'Already synced. No changes to upload.' : 'All changes uploaded in one commit.';
     elem.className = '';
     elem.style =
       'display: inline-block;transform: rotate(45deg);height:24px;width:12px;border-bottom:7px solid #78b13f;border-right:7px solid #78b13f;';
   }
 };
-LeetCodeV2.prototype.markUploadFailed = function () {
+LeetCodeV2.prototype.markUploadFailed = function (message = 'Upload failed.') {
   let elem = document.getElementById(this.progressSpinnerElementId);
   if (elem) {
+    elem.title = message;
     elem.className = '';
     elem.style =
       'display: inline-block;transform: rotate(45deg);height:24px;width:12px;border-bottom:7px solid red;border-right:7px solid red;';

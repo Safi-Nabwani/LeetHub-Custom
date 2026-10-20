@@ -18,7 +18,7 @@ AI and Codex are helping me understand the code, explore changes, and build the 
 
 ## Project status
 
-LeetHub 2.0 source (version 2.0.10) has been imported, and the acceptance check is committed. A tested preparation module now collects changed solution files, descriptions, notes, root README/topics, and stats into one update while preserving existing content. It is not yet connected to the live uploader, which still creates separate commits. Atomic publication and live browser verification are next.
+LeetHub 2.0 source (version 2.0.10) has been imported, and the acceptance check is committed. The submission flow now prepares and publishes changed solution files, descriptions, notes, root README/topics, and stats in one commit. Identical repeats create no commit. Automated validation passes (72 tests and a successful build); this implementation is awaiting review and live browser verification.
 
 ## Repository structure
 
@@ -38,7 +38,7 @@ This repository contains the browser extension. Solved problems are uploaded to 
 | `dist/` | Generated browser builds; excluded from Git |
 | `node_modules/` | Installed development dependencies; excluded from Git |
 
-The planned change preserves the existing solutions repository layout and root README updates. A focused GitHub upload module will collect all applicable solution, description, notes, topic, and stats changes and publish them together in one commit. Unchanged repeat uploads should produce no commit, and existing user content should be preserved.
+The uploader preserves the existing solutions repository layout and root README updates. It collects all applicable solution, description, notes, topic, and stats changes and publishes them together in one commit, preserving existing user content. It retries concurrent branch updates safely and checks uncertain publication outcomes before retrying. An existing solutions repository without `stats.json` needs its progress baseline restored before uploads; the extension does not silently reset its history of solved problems.
 
 Progress is tracked in [LEETHUB_ROADMAP.md](LEETHUB_ROADMAP.md).
 

@@ -3,7 +3,7 @@
 > **Goal:** Preserve the existing solutions repository structure and LeetHub features. Publish each changed accepted solution in **one meaningful Git commit**, including the solution, needed problem description, root README/topic updates, and any applicable notes/stats updates. Identical repeat uploads produce no commit.
 
 **Upstream:** https://github.com/arunbhardwaj/LeetHub-2.0  
-**Status:** T2.1 preparation module implemented and tested against supplied remote snapshots. The live uploader is unchanged; remote snapshot loading, atomic publication, and browser verification are pending. Root README/topics and stats are retained. Check boxes only after verification.
+**Status:** Complete change preparation and atomic publication are implemented and connected to the submission flow. Automated validation passes (72 tests and production build); user review and live browser verification are pending. Root README/topics and stats are retained. Check boxes only after verification.
 **Execution:** Work incrementally. **Do not execute the entire roadmap at once.**
 
 ## Codex operating rules (apply to every session)
@@ -57,26 +57,26 @@
 **Done when:** Patch is scoped, reviewed, and accompanied by a change summary. **Stop.**
 
 ### T2.2 — Verify complete change preparation
-- [ ] Run available targeted tests or add lightweight mocks for affected pathways, if practical.
-- [ ] Confirm root README/topic and stats updates are included when needed, rather than suppressed or committed separately.
-- [ ] Confirm problem-specific content, user README edits, authentication, and repository selection are preserved.
-- [ ] Test new problems, changed and identical resubmissions, missing READMEs, notes, and Unicode content.
-- [ ] Record results and gaps. Commit only after user approval.
+- [x] Run available targeted tests or add lightweight mocks for affected pathways, if practical.
+- [x] Confirm root README/topic and stats updates are included when needed, rather than suppressed or committed separately.
+- [x] Confirm problem-specific content, user README edits, authentication, and repository selection are preserved in automated checks; live OAuth/browser validation remains pending.
+- [x] Test new problems, changed and identical resubmissions, missing READMEs, notes, and Unicode content.
+- [x] Record results and gaps. Commit only after user approval.
 
 **Done when:** All required submission changes can be prepared together without separate publication. **Stop.**
 
 ## Phase 3 — One commit per accepted problem
 
 ### T3.1 — Count current per-problem commits
-- [ ] Determine whether solution files, problem README, and notes use independent GitHub write requests.
-- [ ] Document current commit counts and the expected single commit after batching the full change set, including root metadata.
-- [ ] Check for edge cases: resubmissions, updated solutions, missing README, and failed/partial uploads.
+- [x] Determine whether solution files, problem README, and notes use independent GitHub write requests: the old path did; the new submission path creates one tree/commit/ref update.
+- [x] Document commit counts: previous normal new-solve flow was four commits; new automated checks confirm one visible commit for a changed solve and zero for identical repeats.
+- [x] Check resubmissions, updated solutions, missing README, and failed/partial uploads with mocked GitHub state; live confirmation remains pending.
 
 **Done when:** Actual or well-supported expected commit count is documented. **Stop.**
 
 ### T3.2 — Design batching only if needed
-Design evaluated ahead of Phase 2 at the user's request. The latest scope clarification below supersedes earlier metadata-suppression proposals. Implementation has not been approved or performed. Phase 2 and T3.1 verification remain pending.
-- [ ] If already one commit, mark batching unnecessary; don't change code.
+Design evaluated ahead of Phase 2 at the user's request. The latest scope clarification below supersedes earlier metadata-suppression proposals. User authorized implementation on October 20; implementation and automated checks are complete, with live verification pending.
+- [x] Check whether batching is necessary: multiple independent writes were confirmed, so batching was required.
 - [x] If multiple commits remain, evaluate a minimal atomic GitHub Git Data workflow (blobs → tree → commit → branch ref) or equivalent.
 - [x] Consider API permissions, existing-file updates, concurrent submissions, error handling, default branch, and retries.
 - [x] Compare risks/complexity to benefits and propose the precise implementation scope.
@@ -84,15 +84,15 @@ Design evaluated ahead of Phase 2 at the user's request. The latest scope clarif
 **Done when:** Codex presents a recommended design. **Stop for approval before a risky rewrite.**
 
 ### T3.3 — Implement and test atomic per-problem upload (conditional)
-- [ ] Implement only if T3.2 design is approved and feasible without destabilizing the extension.
-- [ ] Combine all changed problem files and applicable root README/topics/stats updates into one commit per changed accepted submission.
-- [ ] Ensure failure handling avoids silent partial success; preserve updates/resubmissions.
-- [ ] Prevent duplicate uploads from repeated clicks and overlapping automatic/manual events for the same submission.
-- [ ] Handle concurrent branch updates with bounded retries, recomputing root topics/stats against the latest state and preserving other submissions.
-- [ ] Confirm ambiguous publication outcomes before retrying; never force-update a branch or silently overwrite concurrent solution/notes changes.
-- [ ] Use meaningful commit messages with no prefix and an initial capital for every word, e.g. `Add Solution For Two Sum` or `Update Solution For Two Sum`; retain runtime/memory details in the commit body when available.
-- [ ] Show upload success and update local progress only after confirming the complete commit is published; distinguish unchanged uploads from failures.
-- [ ] Add targeted tests for single-commit writes and common failure cases where practical.
+- [x] Implement the approved T3.2 design; browser stability still requires live verification.
+- [x] Combine all changed problem files and applicable root README/topics/stats updates into one commit per changed accepted submission.
+- [x] Ensure failure handling avoids silent partial success; preserve updates/resubmissions in automated checks.
+- [x] Prevent duplicate commits from repeated clicks and overlapping automatic/manual uploads in automated checks.
+- [x] Handle concurrent branch updates with up to three publication attempts, recomputing root topics/stats and preserving other submissions.
+- [x] Confirm ambiguous publication outcomes before retrying; never force-update a branch or silently overwrite concurrent solution/notes changes.
+- [x] Use meaningful commit messages with no prefix, initial capitals, and a maximum 50-character subject; retain runtime/memory details in the body.
+- [x] Show success and update local progress only after confirmed publication; distinguish unchanged results and failures with status tooltips.
+- [x] Add targeted tests for single-commit writes and common failure cases.
 - [ ] After approval, use a local commit such as `Batch Solution And Metadata Updates Into One Commit`.
 
 **Done when:** Tests support one meaningful commit per Accepted problem, or batching is explicitly deferred with reason. **Stop.**
@@ -290,4 +290,17 @@ Historical design entry: references to disabling root README/stats updates are s
 - Added 19 tests in `spec/submission.spec.js`. Full suite: `npm test` passed, 44 specs and 0 failures. `npm run build` passed with the two existing Semantic UI bundle-size/performance warnings. The preparer is covered through direct tests, not bundled into the live extension until integration. No live browser test performed.
 - Runtime integration is deliberately pending: `leetcode.js` still uses its existing upload flow. The next steps must fetch a consistent remote snapshot, call the preparer, and publish the full result atomically; do not wire this into separate file uploads. Missing remote stats currently starts fresh progress for prepared submissions, as existing onboarding does; reconciling any local-only historical stats requires an explicit repository-bound baseline during integration.
 - User approved committing this step on main as `Prepare Complete Submission Updates`. Next: T2.2 review/verification, then single-commit uploader implementation.
+
+### 2026-10-20 — Atomic uploader integration (T2.2, T3.1–T3.3)
+
+- User authorized proceeding with the explained submit-to-publication flow. Added `scripts/leetcode/github.js` and connected `loader` to it; removed the submission's independent Contents API uploads and separate stats update. Discussion-post uploads remain a separate, unchanged feature outside the Accepted-submission transaction.
+- Reads repository metadata/default branch, branch head, immutable commit/tree objects, target problem folder, and UTF-8 blobs. Missing files are determined from tree entries, not ambiguous Contents API 404 responses. Rejects truncated trees, symlinks/unsupported managed file types, malformed content, and empty repositories rather than guessing.
+- Calls the preparation module, creates one tree using the current base tree, creates one commit with the current head as parent, and publishes via `force: false`. Files unrelated to the submission remain in the base tree. Unchanged repeats create no commit. Notes, problem README, root topics, and stats share the solution commit when changed.
+- Per-repository queues serialize local overlapping work; other tabs/devices are coordinated by branch updates. Up to three attempts reread and reprepare against the newest state. Competing solution/notes changes are reported, while root topic and stats updates merge against the latest data. Each V2 submission gets its own parser state so later events do not replace its data. Legacy asynchronous code extraction is now awaited before preparing files.
+- A pending candidate and its baseline are saved locally before publishing. Lost responses are reconciled by checking commit ancestry. Retry reuses an unpublished candidate when its parent is still current, or recognizes an already-published candidate even after later commits. No blind duplicate publication or force update. Pending recovery is keyed to repository and submission content.
+- Updates local stats only after publication is confirmed and only if the selected repository still matches. Status tooltips distinguish a published update, already-synced content, and failures. Root topics use the actual default branch; commit subjects have initial capitals and at most 50 characters, with performance details retained in the body.
+- Compatibility limits: an existing repository with numbered problem folders but missing `stats.json` stops with an explicit progress-baseline error instead of resetting historical counts. Empty repositories need an initial commit. Existing V2 notes extraction remains unimplemented. Actual OAuth permissions, protected-branch rules, DOM detection, browser storage/restart behavior, and a real GitHub write still require live verification.
+- Validation: `npm test` passed with 72 specs and 0 failures. New stateful GitHub tests verify single-commit publication, identical and overlapping repeats, changed code, personal README preservation, concurrent topic/stats merges, same-solution conflicts, interrupted publication/recovery, bounded retries, permission/protection failures, missing stats, empty repositories, Unicode, branch names, and unsupported file types. Pipeline tests exercise the real acceptance check through the uploader and success/failure UI calls; rejected submissions make zero GitHub requests.
+- `npm run build` passed with the two existing Semantic UI bundle warnings. Also verified generated Chromium manifest version 2.0.10 at `dist/chrome/manifest.json`. No live requests to a user's solution repository were made; all publication tests use an in-memory GitHub model.
+- README and roadmap updated. User approved committing on main as `Batch Solution Updates Into One Commit`. Next: load the generated extension and run an accepted/rejected/identical-repeat smoke test against a test repository.
 
