@@ -4,8 +4,8 @@ const leetCodeSectionStart = `<!---LeetCode Topics Start-->`;
 const leetCodeSectionHeader = `# LeetCode Topics`;
 const leetCodeSectionEnd = `<!---LeetCode Topics End-->`;
 
-function appendProblemToReadme(topic, markdownFile, hook, problem) {
-  const url = `https://github.com/${hook}/tree/master/${problem}`;
+function appendProblemToReadme(topic, markdownFile, hook, problem, branch = 'master') {
+  const url = `https://github.com/${hook}/tree/${encodeURIComponent(branch)}/${problem}`;
   const topicHeader = `## ${topic}`;
   const topicTableHeader = `\n${topicHeader}\n|  |\n| ------- |\n`;
   const newRow = `| [${problem}](${url}) |`;

@@ -18,7 +18,7 @@ AI and Codex are helping me understand the code, explore changes, and build the 
 
 ## Project status
 
-LeetHub 2.0 source (version 2.0.10) has been imported, and repository discovery is complete. An explicit acceptance check for the newer LeetCode interface is committed; its automated tests and the build pass. The next change will preserve the existing solutions repository structure and features while combining solution files, root README/topics, and applicable notes/stats updates into one commit. Batching and live browser verification are still pending.
+LeetHub 2.0 source (version 2.0.10) has been imported, and the acceptance check is committed. A tested preparation module now collects changed solution files, descriptions, notes, root README/topics, and stats into one update while preserving existing content. It is not yet connected to the live uploader, which still creates separate commits. Atomic publication and live browser verification are next.
 
 ## Repository structure
 

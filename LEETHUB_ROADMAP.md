@@ -3,7 +3,7 @@
 > **Goal:** Preserve the existing solutions repository structure and LeetHub features. Publish each changed accepted solution in **one meaningful Git commit**, including the solution, needed problem description, root README/topic updates, and any applicable notes/stats updates. Identical repeat uploads produce no commit.
 
 **Upstream:** https://github.com/arunbhardwaj/LeetHub-2.0  
-**Status:** Phase 1 discovery complete. Acceptance check committed and tested. Revised batching requirements and optimizations documented; implementation and live browser verification are pending. Root README/topics and stats are retained. Check boxes only after verification.
+**Status:** T2.1 preparation module implemented and tested against supplied remote snapshots. The live uploader is unchanged; remote snapshot loading, atomic publication, and browser verification are pending. Root README/topics and stats are retained. Check boxes only after verification.
 **Execution:** Work incrementally. **Do not execute the entire roadmap at once.**
 
 ## Codex operating rules (apply to every session)
@@ -12,7 +12,7 @@
 2. Work on **only the task ID(s) I explicitly assign**. If I do not specify any, begin with **T1.1 only**.
 3. After each task, summarize what changed, evidence/tests, blockers, and the next recommended task. **Stop and wait for my next instruction.**
 4. Keep this file updated: check completed tasks `[x]`, leave blocked or unverified tasks `[ ]`, and record findings in the progress log at the bottom.
-5. Make **local Git commits only after explicit user approval**. Use no prefixes and capitalize the first letter of every word in commit messages. **Never push or force-push**, rewrite remote history, delete repositories, or modify old remote commits without explicit approval.
+5. Make **local Git commits only after explicit user approval**. Use no prefixes, capitalize the first letter of every word, and keep the subject at most 50 characters. **Never push or force-push**, rewrite remote history, delete repositories, or modify old remote commits without explicit approval.
 6. Never commit secrets or credentials. Preserve authentication, LeetCode Accepted detection, language/filename/folder resolution, GitHub connection, and problem-specific content.
 7. Favor small, maintainable patches over rewrites. Check for dirty/untracked user changes before editing; don't discard them.
 8. Do not claim a test passed unless it actually ran. If real-browser verification requires me, give precise manual steps and mark verification pending.
@@ -47,12 +47,12 @@
 ## Phase 2 — Prepare one complete submission update
 
 ### T2.1 — Collect file changes without publishing separately
-- [ ] Prepare solution code, a missing problem README, available notes, root README/topics, and applicable stats updates as one submission change set.
-- [ ] Preserve the existing folder/filename mapping and language support.
-- [ ] Preserve an existing problem README and notes when no replacement is intended; inspect GitHub state rather than relying solely on local SHA caches.
-- [ ] Preserve root README content outside LeetHub's marked topic section; retain topic sorting and duplicate prevention.
-- [ ] Keep stats and local progress behavior, preparing their updates before publication without counting the same problem twice.
-- [ ] Compare desired content to current repository content and exclude unchanged files. If the entire change set is unchanged, publish no commit.
+- [x] Prepare solution code, a missing problem README, available notes, root README/topics, and applicable stats updates as one submission change set.
+- [x] Preserve the existing folder/filename mapping and language support.
+- [x] Preserve an existing problem README and notes when no replacement is intended; use supplied remote file state rather than local SHA caches. Fetching that state will be integrated with the atomic uploader.
+- [x] Preserve root README content outside LeetHub's marked topic section; retain topic sorting and duplicate prevention.
+- [x] Prepare persistent stats and the local progress result without double-counting; applying that result after publication is part of uploader integration.
+- [x] Compare desired content to current repository content and exclude unchanged files; return an empty change set for an identical repeat. The future uploader must honor this by publishing no commit.
 
 **Done when:** Patch is scoped, reviewed, and accompanied by a change summary. **Stop.**
 
@@ -279,4 +279,15 @@ Historical design entry: references to disabling root README/stats updates are s
 - Identical repeat uploads must create zero commits, including metadata: do not change stats merely because files were uploaded, and keep local upload/cache tracking separate from persisted semantic progress so refreshed SHA bookkeeping does not itself cause commits. Final stats payload/cache compatibility needs verification during T2.1.
 - Acceptance criteria include all changed submission files in one visible commit, no separate metadata commits, no writes for rejected submissions, no duplicate commits for identical retries, preservation of user edits, and no partial-success indicator.
 - Updated active phases and README to match this clarification. No implementation, new tests, commit, or push in this documentation update. Next session: T2.1, prepare the complete submission change set.
+
+### 2026-10-20 — T2.1 preparation implementation
+
+- Added `scripts/leetcode/submission.js`: `prepareSubmission` consumes decoded files from a single remote commit and returns changed files with expected old hashes, proposed new blob hashes, and the local stats result to apply after confirmed publication. It performs no network writes or storage mutations. Missing files must be explicitly null; unread files and malformed metadata fail instead of being overwritten.
+- Preserves existing problem descriptions, notes when no nonempty replacement is supplied, root README content outside managed markers, other problem records, and other top-level stats fields. Maintains the existing folder/language resolution, including nonnumeric identifiers.
+- Prepares root topic updates, solution/description/notes, and persistent stats together. Hashes UTF-8 content with Git's blob header so file tracking can be computed before publication. Stats-file self-hash is updated only in returned local tracking; persisted legacy tracking is retained without creating a recursive update cycle.
+- Content comparison excludes unchanged files; semantic stats comparison preserves existing JSON formatting when values do not change. Identical repeats yield zero changes, changed solutions refresh their SHA without incrementing counts, and a second language for an existing problem does not increment counts.
+- Topic helper now accepts an optional branch argument; legacy callers retain their current default. The preparer uses the selected branch for new links and isolates the managed topic section before calling the existing sorter so personal headings cannot be moved.
+- Added 19 tests in `spec/submission.spec.js`. Full suite: `npm test` passed, 44 specs and 0 failures. `npm run build` passed with the two existing Semantic UI bundle-size/performance warnings. The preparer is covered through direct tests, not bundled into the live extension until integration. No live browser test performed.
+- Runtime integration is deliberately pending: `leetcode.js` still uses its existing upload flow. The next steps must fetch a consistent remote snapshot, call the preparer, and publish the full result atomically; do not wire this into separate file uploads. Missing remote stats currently starts fresh progress for prepared submissions, as existing onboarding does; reconciling any local-only historical stats requires an explicit repository-bound baseline during integration.
+- User approved committing this step on main as `Prepare Complete Submission Updates`. Next: T2.2 review/verification, then single-commit uploader implementation.
 
